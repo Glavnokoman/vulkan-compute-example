@@ -9,3 +9,8 @@ Features covered:
 - array binding to the shader
 - push constants (to define array dimensions and scaling constant)
 - specialization constants (to define the workgroup dimensions)
+
+# Dependencies
+
+- cmake
+- [catch2](https://github.com/catchorg/Catch2) (optional)
