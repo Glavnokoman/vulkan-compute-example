@@ -79,6 +79,14 @@ auto ExampleFilter::bindParameters(vk::Buffer& out, const vk::Buffer& in
 	cmdBuffer = createCommandBuffer(device, cmdPool, pipe, pipeLayout, dscSet, p);
 }
 
+///
+auto ExampleFilter::unbindParameters() const-> void
+{
+	device.destroyDescriptorPool(dscPool);
+	device.resetCommandPool(cmdPool, vk::CommandPoolResetFlags());
+	dscPool = allocDescriptorPool(device);
+}
+
 /// run (sync) the filter on previously bound parameters
 auto ExampleFilter::run() const-> void {
 	assert(cmdBuffer != vk::CommandBuffer{}); // TODO: this should be a check for a valid command buffer
@@ -98,6 +106,7 @@ auto ExampleFilter::operator()(vk::Buffer& out, const vk::Buffer& in
 {
 	bindParameters(out, in, p);
 	run();
+	unbindParameters();
 }
 
 /// Create vulkan Instance with app specific parameters.

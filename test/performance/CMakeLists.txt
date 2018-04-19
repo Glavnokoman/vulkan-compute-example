@@ -11,6 +11,8 @@ add_custom_command(
 )
 add_custom_target(link_shaders_bench DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/shaders)
 
-find_package(benchmark)
+find_package(sltbench REQUIRED)
+
 add_executable(bench_saxpy saxpy_b.cpp)
-target_link_libraries(bench_saxpy PRIVATE benchmark::benchmark example_filter)
+target_link_libraries(bench_saxpy PRIVATE sltbench example_filter)
+add_dependencies(bench_saxpy link_shaders_bench)

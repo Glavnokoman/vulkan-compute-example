@@ -21,7 +21,7 @@ public: // data
 	vk::ShaderModule shader;           ///< compute shader
 	vk::Queue queue;                   ///< command queue supporting compute operations
 	vk::DescriptorSetLayout dscLayout; ///< c++ definition of the shader binding interface
-	vk::DescriptorPool dscPool;        ///< descriptors pool
+	mutable vk::DescriptorPool dscPool; ///< descriptors pool
 	vk::CommandPool cmdPool;           ///< used to allocate command buffers
 	vk::PipelineCache pipeCache;       ///< pipeline cache
 	vk::PipelineLayout pipeLayout;     ///< defines shader interface as a set of layout bindings and push constants
@@ -45,6 +45,7 @@ public:
 	// auto updateSpecializations()-> void; // to implement
 	
 	auto bindParameters(vk::Buffer& out, const vk::Buffer& in, const PushParams& p) const-> void;
+	auto unbindParameters() const-> void;
 	auto run() const-> void;
 	auto operator()(vk::Buffer& out, const vk::Buffer& in, const PushParams& p ) const-> void;
 private: // helpers		
