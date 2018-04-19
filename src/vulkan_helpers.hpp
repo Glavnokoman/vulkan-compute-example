@@ -13,47 +13,32 @@ namespace vuh {
 template<class T>
 auto div_up(T x, T y)-> T { return (x + y - 1)/y; }
 
-template<class T> using raw_ptr = typename std::add_pointer<T>::type;
-
-/// access to (host-visible!!!) device memory from the host
-template<class T>
-struct BufferHostView {
-	using value_type = T;
-	using ptr_type = raw_ptr<T>;
-	
-	std::unique_ptr<const vk::Device> device;
-	const vk::DeviceMemory& devMemory;
-	const ptr_type data; ///< points to the first element
-	const size_t size;   ///< number of elements
-	
-	BufferHostView(BufferHostView&&) = default;
-	auto operator=(BufferHostView&&)-> BufferHostView& = default;
-	
-	/// Constructor
-	explicit BufferHostView(const vk::Device& device
-	                        , const vk::DeviceMemory& devMem
-	                        , size_t nelements ///< number of elements
-	                        , uint32_t offset = 0
-	                        )
-	   : device(&device), devMemory(devMem)
-	   , data(ptr_type(device.mapMemory(devMem, offset, nelements*sizeof(T))))
-	   , size(nelements)
-	{}
-	
-	~BufferHostView() noexcept {
-		if(device){
-			device->unmapMemory(devMemory);
-			device.release();
-		}
-	}
-	
-	auto begin()->ptr_type { return data; }
-	auto end()-> ptr_type { return data + size; }
-}; // BufferHostView
-
 /// Device buffer owning its chunk of memory.
 template<class T>
 class DeviceBufferOwn {
+	// Helper class to access to (host-visible!!!) device memory from the host. 
+	// Unmapping memory is not necessary.
+	struct BufferHostView {
+		using ptr_type = T*;
+		
+		const vk::Device device;
+		const vk::DeviceMemory devMemory;
+		const ptr_type data; ///< points to the first element
+		const size_t size;   ///< number of elements
+		
+		/// Constructor
+		explicit BufferHostView(vk::Device device, vk::DeviceMemory devMem
+										, size_t nelements ///< number of elements
+										)
+			: device(device), devMemory(devMem)
+			, data(ptr_type(device.mapMemory(devMem, 0, nelements*sizeof(T))))
+			, size(nelements)
+		{}
+		
+		auto begin()-> ptr_type { return data; }
+		auto end()-> ptr_type { return data + size; }
+	}; // BufferHostView
+	
 private:
 	vk::Buffer _buf;                        ///< device buffer
 	vk::DeviceMemory _mem;                  ///< associated chunk of device memorys
@@ -129,12 +114,10 @@ public:
 		}
 	}
 	
-	///
-	auto host_view()-> BufferHostView<T> {
-		return BufferHostView<T>(*_dev, _mem, size());
-	}
-	
 private: // helpers
+	///
+	auto host_view()-> BufferHostView { return BufferHostView(*_dev, _mem, size()); }
+
 	/// Helper constructor
 	explicit DeviceBufferOwn(const vk::Device& device, const vk::PhysicalDevice& physDevice
 	                         , vk::Buffer buffer
@@ -176,4 +159,3 @@ private: // helpers
 }; // DeviceBufferOwn
 
 } // namespace vuh
-
