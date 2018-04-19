@@ -213,7 +213,8 @@ auto ExampleFilter::createCommandBuffer(const vk::Device& device, const vk::Comm
 	auto commandBuffer = device.allocateCommandBuffers(commandBufferAI)[0];
 
 	// Start recording commands into the newly allocated command buffer.
-	auto beginInfo = vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit); // buffer is only submitted and used once
+//	auto beginInfo = vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit); // buffer is only submitted and used once
+	auto beginInfo = vk::CommandBufferBeginInfo();
 	commandBuffer.begin(beginInfo);
 
 	// Before dispatch bind a pipeline, AND a descriptor set.
