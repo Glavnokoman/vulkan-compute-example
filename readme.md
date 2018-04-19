@@ -14,3 +14,4 @@ Features covered:
 
 - cmake
 - [catch2](https://github.com/catchorg/Catch2) (optional)
+- [sltbench](https://github.com/ivafanas/sltbench) (optional)

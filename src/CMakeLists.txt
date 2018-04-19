@@ -10,3 +10,6 @@ add_library(example_filter STATIC example_filter.cpp vulkan_helpers.cpp)
 target_link_libraries(example_filter PUBLIC Vulkan::Vulkan)
 target_include_directories(example_filter PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_dependencies(example_filter saxpy_shader)
+
+add_executable(vulkan_example main.cpp)
+target_link_libraries(vulkan_example PRIVATE example_filter)
