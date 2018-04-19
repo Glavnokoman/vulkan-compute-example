@@ -182,4 +182,24 @@ auto allocMemory(const vk::PhysicalDevice& physDev, const vk::Device& device
    return device.allocateMemory(allocInfo);
 }
 
+/// Copy device buffers using the transient command pool.
+/// Fully sync, no latency hiding whatsoever.
+auto copyBuf(const vk::Buffer& src, vk::Buffer& dst, const uint32_t size
+             , const vk::Device& device, const vk::PhysicalDevice& physDev)-> void
+{
+	const auto qf_id = getComputeQueueFamilyId(physDev); // queue family id, TODO: use transfer queue
+	auto cmd_pool = device.createCommandPool({vk::CommandPoolCreateFlagBits::eTransient, qf_id});
+	auto cmd_buf = device.allocateCommandBuffers({cmd_pool, vk::CommandBufferLevel::ePrimary, 1})[0];
+	cmd_buf.begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+	auto region = vk::BufferCopy(0, 0, size);
+	cmd_buf.copyBuffer(src, dst, 1, &region);
+	cmd_buf.end();
+	auto queue = device.getQueue(qf_id, 0);
+	auto submit_info = vk::SubmitInfo(0, nullptr, nullptr, 1, &cmd_buf);
+	queue.submit({submit_info}, nullptr);
+	queue.waitIdle();
+	device.freeCommandBuffers(cmd_pool, 1, &cmd_buf);
+	device.destroyCommandPool(cmd_pool);
+}
+
 } // namespace vuh

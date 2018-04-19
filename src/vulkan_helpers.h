@@ -47,4 +47,7 @@ auto allocMemory(const vk::PhysicalDevice& physDev, const vk::Device& device
                  , uint32_t memory_id
                  )-> vk::DeviceMemory;
 
+auto copyBuf(const vk::Buffer& src, vk::Buffer& dst, const uint32_t size
+             , const vk::Device& device, const vk::PhysicalDevice& physDev)-> void;
+
 } // namespace vuh

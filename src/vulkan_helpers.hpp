@@ -15,7 +15,7 @@ auto div_up(T x, T y)-> T { return (x + y - 1)/y; }
 
 template<class T> using raw_ptr = typename std::add_pointer<T>::type;
 
-/// access to device memory from the host
+/// access to (host-visible!!!) device memory from the host
 template<class T>
 struct BufferHostView {
 	using value_type = T;
@@ -52,7 +52,6 @@ struct BufferHostView {
 }; // BufferHostView
 
 /// Device buffer owning its chunk of memory.
-/// @TODO when physical device is discrete GPU non-host-visible buffer should have VK_BUFFER_USAGE_TRANSFER_SRC_BIT and DST bits 
 template<class T>
 class DeviceBufferOwn {
 private:
@@ -96,26 +95,12 @@ public:
 	{
 		auto r = DeviceBufferOwn<T>(device, physDev, uint32_t(c.size()), properties, usage);
 		if(r._flags & vk::MemoryPropertyFlagBits::eHostVisible){ // memory is host-visible
-			auto hv = r.host_view();
-			std::copy(begin(c), end(c), hv.data);
-		} else { // memory is not host visible
+			std::copy(begin(c), end(c), r.host_view().data);
+		} else { // memory is not host visible, use staging buffer
 			auto stage_buf = fromHost(std::forward<C>(c), device, physDev
 			                          , vk::MemoryPropertyFlagBits::eHostVisible
 			                          , vk::BufferUsageFlagBits::eTransferSrc);
-			// copy from staging buffer to device memory
-			const auto qf_id = getComputeQueueFamilyId(physDev); // queue family id, TODO: use transfer queue
-			auto cmd_pool = device.createCommandPool({vk::CommandPoolCreateFlagBits::eTransient, qf_id});
-			auto cmd_buf = device.allocateCommandBuffers({cmd_pool, vk::CommandBufferLevel::ePrimary, 1})[0];
-			cmd_buf.begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-			auto region = vk::BufferCopy(0, 0, stage_buf.size()*sizeof(T));
-			cmd_buf.copyBuffer(stage_buf, r, 1, &region);
-			cmd_buf.end();
-			auto queue = device.getQueue(qf_id, 0);
-			auto submit_info = vk::SubmitInfo(0, nullptr, nullptr, 1, &cmd_buf);
-			queue.submit({submit_info}, nullptr);
-			queue.waitIdle();
-			device.freeCommandBuffers(cmd_pool, 1, &cmd_buf);
-			device.destroyCommandPool(cmd_pool);
+			copyBuf(stage_buf, r, stage_buf.size()*sizeof(T), device, physDev);
 		}
 		return r;
 	}
@@ -134,25 +119,12 @@ public:
 			auto hv = host_view();
 			c.resize(size());
 			std::copy(std::begin(hv), std::end(hv), c.data());
-		} else { // memory is not host visible
+		} else { // memory is not host visible, use staging buffer
 			// copy device memory to staging buffer
 			auto stage_buf = DeviceBufferOwn(*_dev, _physdev, size()
 			                                 , vk::MemoryPropertyFlagBits::eHostVisible
 			                                 , vk::BufferUsageFlagBits::eTransferDst);
-			const auto qf_id = getComputeQueueFamilyId(_physdev); // queue family id, TODO: use transfer queue
-			auto cmd_pool = _dev->createCommandPool({vk::CommandPoolCreateFlagBits::eTransient, qf_id});
-			auto cmd_buf = _dev->allocateCommandBuffers({cmd_pool, vk::CommandBufferLevel::ePrimary, 1})[0];
-			cmd_buf.begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-			auto region = vk::BufferCopy(0, 0, size()*sizeof(T));
-			cmd_buf.copyBuffer(_buf, stage_buf, 1, &region);
-			cmd_buf.end();
-			auto queue = _dev->getQueue(qf_id, 0);
-			auto submit_info = vk::SubmitInfo(0, nullptr, nullptr, 1, &cmd_buf);
-			queue.submit({submit_info}, nullptr);
-			queue.waitIdle();
-			_dev->freeCommandBuffers(cmd_pool, 1, &cmd_buf);
-			_dev->destroyCommandPool(cmd_pool);
-			
+			copyBuf(_buf, stage_buf, size()*sizeof(T), *_dev, _physdev);
 			stage_buf.to_host(c); // copy from staging buffer to host
 		}
 	}
