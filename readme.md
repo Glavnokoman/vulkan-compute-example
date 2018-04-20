@@ -5,11 +5,12 @@ Saxpy kernel computation on 2d arrays.
 
 Features covered:
 - Vulkan boilerplate setup using vulkan-hpp
-- compiling glsl shader to spir-v
 - data copy between host and device-local memory
-- binding array parameters to the shader
-- push constants (to define array dimensions and scaling constant)
-- specialization constants (to define the workgroup dimensions)
+- passing array parameters to shader (layout bindings)
+- passing non-array parameters to shader (push constants)
+- define workgroup dimensions (specialization constants)
+- very simple glsl shader (saxpy)
+- glsl to spir-v compilation (build time)
 
 # Dependencies
 
