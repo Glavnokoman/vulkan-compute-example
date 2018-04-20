@@ -12,8 +12,11 @@ Features covered:
 - very simple glsl shader (saxpy)
 - glsl to spir-v compilation (build time)
 
-# Dependencies
-
+## Dependencies
+- c++14 compatible compiler
 - cmake
+- [vulkan-headers](https://github.com/KhronosGroup/Vulkan-Docs)
+- [vulkan-hpp](https://github.com/KhronosGroup/Vulkan-Hpp)
+- [glslang](https://github.com/KhronosGroup/glslang)
 - [catch2](https://github.com/catchorg/Catch2) (optional)
 - [sltbench](https://github.com/ivafanas/sltbench) (optional)
