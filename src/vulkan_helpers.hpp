@@ -153,6 +153,6 @@ private: // helpers
 		}
 		return usage;
 	}
-}; // DeviceBufferOwn
+}; // Array
 
 } // namespace vuh
