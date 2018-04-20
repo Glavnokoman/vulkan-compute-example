@@ -26,13 +26,12 @@ public: // data
 	vk::PipelineLayout pipeLayout;      ///< defines shader interface as a set of layout bindings and push constants
 	
 	vk::Pipeline pipe;                   ///< pipeline to submit compute commands
-	mutable vk::CommandBuffer cmdBuffer; ///< used to record commands to be queued
+	mutable vk::CommandBuffer cmdBuffer; ///< commands recorded here, once command buffer is submitted to a queue those commands get executed
 	
 	uint32_t compute_queue_familly_id;   ///< index of the queue family supporting compute loads
 public:
 	explicit ExampleFilter(const std::string& shaderPath);
 	~ExampleFilter() noexcept;
-	// auto updateSpecializations()-> void; // to implement
 	
 	auto bindParameters(vk::Buffer& out, const vk::Buffer& in, const PushParams& p) const-> void;
 	auto unbindParameters() const-> void;

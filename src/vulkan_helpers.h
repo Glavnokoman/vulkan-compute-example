@@ -6,6 +6,8 @@
 
 namespace vuh {
 
+inline auto div_up(uint32_t x, uint32_t y){ return (x + y - 1u)/y; }
+
 VKAPI_ATTR VkBool32 VKAPI_CALL debugReporter(
       VkDebugReportFlagsEXT, VkDebugReportObjectTypeEXT, uint64_t, size_t, int32_t
       , const char*                pLayerPrefix

@@ -10,9 +10,6 @@
 
 namespace vuh {
 
-template<class T>
-auto div_up(T x, T y)-> T { return (x + y - 1)/y; }
-
 /// Device buffer owning its chunk of memory.
 template<class T>
 class DeviceBufferOwn {
