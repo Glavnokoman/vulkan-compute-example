@@ -51,12 +51,12 @@ struct FixShaderOnly: private DataFixFull {
    
    struct DeviceData{
       explicit DeviceData(const DataFixFull& d)
-         : d_y{vuh::DeviceBufferOwn<float>::fromHost(d.y, d.f.device, d.f.physDevice)}
-         , d_x{vuh::DeviceBufferOwn<float>::fromHost(d.x, d.f.device, d.f.physDevice)}
+         : d_y{vuh::Array<float>::fromHost(d.y, d.f.device, d.f.physDevice)}
+         , d_x{vuh::Array<float>::fromHost(d.x, d.f.device, d.f.physDevice)}
       {}
       
-      vuh::DeviceBufferOwn<float> d_y;
-      vuh::DeviceBufferOwn<float> d_x;
+      vuh::Array<float> d_y;
+      vuh::Array<float> d_x;
    };
    
    
@@ -81,8 +81,8 @@ private:
 
 /// Copy arrays data to gpu device, setup the kernel and run it.
 auto saxpy(DataFixFull& fix, const Params& p)-> void {
-   auto d_y = vuh::DeviceBufferOwn<float>::fromHost(fix.y, fix.f.device, fix.f.physDevice);
-   auto d_x = vuh::DeviceBufferOwn<float>::fromHost(fix.x, fix.f.device, fix.f.physDevice);
+   auto d_y = vuh::Array<float>::fromHost(fix.y, fix.f.device, fix.f.physDevice);
+   auto d_x = vuh::Array<float>::fromHost(fix.x, fix.f.device, fix.f.physDevice);
    
    fix.f(d_y, d_x, {fix.p.width, fix.p.height, fix.p.a});
 }

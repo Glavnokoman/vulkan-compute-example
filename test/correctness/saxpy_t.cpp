@@ -17,8 +17,8 @@ TEST_CASE("saxpy", "[correctness]"){
 	auto x = std::vector<float>(width*height, 0.65f);
 	
 	ExampleFilter f("shaders/saxpy.spv");
-	auto d_y = vuh::DeviceBufferOwn<float>::fromHost(y, f.device, f.physDevice);
-	auto d_x = vuh::DeviceBufferOwn<float>::fromHost(x, f.device, f.physDevice);
+	auto d_y = vuh::Array<float>::fromHost(y, f.device, f.physDevice);
+	auto d_x = vuh::Array<float>::fromHost(x, f.device, f.physDevice);
 
 	f(d_y, d_x, {width, height, a});
 

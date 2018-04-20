@@ -12,7 +12,7 @@ namespace vuh {
 
 /// Device buffer owning its chunk of memory.
 template<class T>
-class DeviceBufferOwn {
+class Array {
 	// Helper class to access to (host-visible!!!) device memory from the host. 
 	// Unmapping memory is not necessary.
 	struct BufferHostView {
@@ -46,22 +46,22 @@ private:
 public:
 	using value_type = T;
 
-	DeviceBufferOwn(DeviceBufferOwn&&) = default;
-	auto operator=(DeviceBufferOwn&&)-> DeviceBufferOwn& = default;
+	Array(Array&&) = default;
+	auto operator=(Array&&)-> Array& = default;
 	
 	/// Constructor
-	explicit DeviceBufferOwn(const vk::Device& device, const vk::PhysicalDevice& physDevice
+	explicit Array(const vk::Device& device, const vk::PhysicalDevice& physDevice
 	                         , uint32_t n_elements ///< number of elements of corresponding type
 	                         , vk::MemoryPropertyFlags properties=vk::MemoryPropertyFlagBits::eDeviceLocal
 	                         , vk::BufferUsageFlags usage=vk::BufferUsageFlagBits::eStorageBuffer
 	                         )
-	   : DeviceBufferOwn(device, physDevice
+	   : Array(device, physDevice
 	       , createBuffer(device, n_elements*sizeof(T), update_usage(physDevice, properties, usage))
 	       , properties, n_elements)
 	{}
 	
 	/// Destructor
-	~DeviceBufferOwn() noexcept {
+	~Array() noexcept {
 		if(_dev){
 			_dev->freeMemory(_mem);
 			_dev->destroyBuffer(_buf);
@@ -73,9 +73,9 @@ public:
 	static auto fromHost(C&& c, const vk::Device& device, const vk::PhysicalDevice& physDev
 	                     , vk::MemoryPropertyFlags properties=vk::MemoryPropertyFlagBits::eDeviceLocal
 								, vk::BufferUsageFlags usage=vk::BufferUsageFlagBits::eStorageBuffer
-	                    )-> DeviceBufferOwn 
+	                    )-> Array 
 	{
-		auto r = DeviceBufferOwn<T>(device, physDev, uint32_t(c.size()), properties, usage);
+		auto r = Array<T>(device, physDev, uint32_t(c.size()), properties, usage);
 		if(r._flags & vk::MemoryPropertyFlagBits::eHostVisible){ // memory is host-visible
 			std::copy(begin(c), end(c), r.host_view().data);
 		} else { // memory is not host visible, use staging buffer
@@ -87,8 +87,8 @@ public:
 		return r;
 	}
 
-	operator vk::Buffer& () { return *reinterpret_cast<vk::Buffer*>(this + offsetof(DeviceBufferOwn, _buf)); }
-	operator const vk::Buffer& () const { return *reinterpret_cast<const vk::Buffer*>(this + offsetof(DeviceBufferOwn, _buf)); }
+	operator vk::Buffer& () { return *reinterpret_cast<vk::Buffer*>(this + offsetof(Array, _buf)); }
+	operator const vk::Buffer& () const { return *reinterpret_cast<const vk::Buffer*>(this + offsetof(Array, _buf)); }
 
 	/// @return number of items in the buffer
 	auto size() const-> size_t {
@@ -103,7 +103,7 @@ public:
 			std::copy(std::begin(hv), std::end(hv), c.data());
 		} else { // memory is not host visible, use staging buffer
 			// copy device memory to staging buffer
-			auto stage_buf = DeviceBufferOwn(*_dev, _physdev, size()
+			auto stage_buf = Array(*_dev, _physdev, size()
 			                                 , vk::MemoryPropertyFlagBits::eHostVisible
 			                                 , vk::BufferUsageFlagBits::eTransferDst);
 			copyBuf(_buf, stage_buf, size()*sizeof(T), *_dev, _physdev);
@@ -116,17 +116,17 @@ private: // helpers
 	auto host_view()-> BufferHostView { return BufferHostView(*_dev, _mem, size()); }
 
 	/// Helper constructor
-	explicit DeviceBufferOwn(const vk::Device& device, const vk::PhysicalDevice& physDevice
+	explicit Array(const vk::Device& device, const vk::PhysicalDevice& physDevice
 	                         , vk::Buffer buffer
 	                         , vk::MemoryPropertyFlags properties
 	                         , size_t size
 	                         )
-	   : DeviceBufferOwn(device, physDevice, buffer, size
+	   : Array(device, physDevice, buffer, size
 	                     , selectMemory(physDevice, device, buffer, properties))
 	{}
 	
 	/// Helper constructor. This one does the actual construction and binding.
-	explicit DeviceBufferOwn(const vk::Device& device, const vk::PhysicalDevice& physDevice
+	explicit Array(const vk::Device& device, const vk::PhysicalDevice& physDevice
 	                         , vk::Buffer buf, size_t size
 	                         , uint32_t memory_id)
 	   : _buf(buf)
