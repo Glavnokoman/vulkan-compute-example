@@ -29,14 +29,13 @@ ExampleFilter::ExampleFilter(const std::string& shaderPath){
 	debugReportCallback = enableValidation ? registerValidationReporter(instance, debugReporter)
 														: nullptr;
 	physDevice = instance.enumeratePhysicalDevices()[0]; // just use the first device
-	const auto queueFamilyId = getComputeQueueFamilyId(physDevice);
-	device = createDevice(physDevice, layers, queueFamilyId); // TODO: when physical device is a discrete gpu, transfer queue needs to be included.
+	compute_queue_familly_id = getComputeQueueFamilyId(physDevice);
+	device = createDevice(physDevice, layers, compute_queue_familly_id); // TODO: when physical device is a discrete gpu, transfer queue needs to be included
 	shader = loadShader(device, shaderPath.c_str());
-	queue = device.getQueue(queueFamilyId, 0); // get the first queue in the suitable family
 
 	dscLayout = createDescriptorSetLayout(device);
 	dscPool = allocDescriptorPool(device);
-	auto commandPoolCI = vk::CommandPoolCreateInfo(vk::CommandPoolCreateFlags(), queueFamilyId);
+	auto commandPoolCI = vk::CommandPoolCreateInfo(vk::CommandPoolCreateFlags(), compute_queue_familly_id);
 	cmdPool = device.createCommandPool(commandPoolCI);
 	pipeCache = device.createPipelineCache(vk::PipelineCacheCreateInfo());
 	pipeLayout = createPipelineLayout(device, dscLayout);
@@ -90,12 +89,13 @@ auto ExampleFilter::unbindParameters() const-> void
 /// run (sync) the filter on previously bound parameters
 auto ExampleFilter::run() const-> void {
 	assert(cmdBuffer != vk::CommandBuffer{}); // TODO: this should be a check for a valid command buffer
-	auto fence = device.createFence(vk::FenceCreateInfo());
 	auto submitInfo = vk::SubmitInfo(0, nullptr, nullptr, 1, &cmdBuffer); // submit a single command buffer
 
 	// submit the command buffer to the queue and set up a fence.
+	auto queue = device.getQueue(compute_queue_familly_id, 0); // 0 is the queue index in the family, by default just the first one is used
+	auto fence = device.createFence(vk::FenceCreateInfo()); // fence makes sure the control is not returned to CPU till command buffer is depleted
 	queue.submit({submitInfo}, fence);
-	device.waitForFences({fence}, true, uint64_t(-1));
+	device.waitForFences({fence}, true, uint64_t(-1));      // wait for the fence indefinitely
 	device.destroyFence(fence);
 }
 

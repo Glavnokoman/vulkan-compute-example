@@ -131,16 +131,16 @@ auto getComputeQueueFamilyId(const vk::PhysicalDevice& physicalDevice)-> uint32_
 
 	// prefer using compute-only queue
 	auto queue_it = std::find_if(ALL(queueFamilies), [](auto& f){
-		auto maskedFlags = ~vk::QueueFlagBits::eSparseBinding & f.queueFlags;
-		return 0 < f.queueCount
-		      && !(vk::QueueFlagBits::eGraphics & maskedFlags)
-		      && (vk::QueueFlagBits::eCompute & maskedFlags);
+		auto maskedFlags = ~vk::QueueFlagBits::eSparseBinding & f.queueFlags; // ignore sparse binding flag 
+		return 0 < f.queueCount                                               // queue family does have some queues in it
+		      && (vk::QueueFlagBits::eCompute & maskedFlags)
+		      && !(vk::QueueFlagBits::eGraphics & maskedFlags);
 	});
 	if(queue_it != end(queueFamilies)){
 		return uint32_t(std::distance(begin(queueFamilies), queue_it));
 	}
 
-	// otherwise use any queue that would work
+	// otherwise use any queue that has compute flag set
 	queue_it = std::find_if(ALL(queueFamilies), [](auto& f){
 		auto maskedFlags = ~vk::QueueFlagBits::eSparseBinding & f.queueFlags;
 		return 0 < f.queueCount && (vk::QueueFlagBits::eCompute & maskedFlags);

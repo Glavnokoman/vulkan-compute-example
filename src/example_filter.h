@@ -19,7 +19,7 @@ public: // data
 	vk::PhysicalDevice physDevice;     ///< physical device
 	vk::Device device;                 ///< logical device providing access to a physical one
 	vk::ShaderModule shader;           ///< compute shader
-	vk::Queue queue;                   ///< command queue supporting compute operations
+//	vk::Queue queue;                   ///< command queue supporting compute operations
 	vk::DescriptorSetLayout dscLayout; ///< c++ definition of the shader binding interface
 	mutable vk::DescriptorPool dscPool; ///< descriptors pool
 	vk::CommandPool cmdPool;           ///< used to allocate command buffers
@@ -39,6 +39,7 @@ public: // data
 	vk::Pipeline pipe;                   ///< pipeline to submit compute commands
 	mutable vk::CommandBuffer cmdBuffer; ///< used to record commands to be queued
 	
+	uint32_t compute_queue_familly_id;
 public:
 	explicit ExampleFilter(const std::string& shaderPath);
 	~ExampleFilter() noexcept;
