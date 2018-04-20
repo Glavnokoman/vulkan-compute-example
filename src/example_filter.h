@@ -14,32 +14,21 @@ struct ExampleFilter {
 	};
 	
 public: // data
-	vk::Instance instance;             ///< Vulkan instance
+	vk::Instance instance;              ///< Vulkan instance
 	VkDebugReportCallbackEXT debugReportCallback; //
-	vk::PhysicalDevice physDevice;     ///< physical device
-	vk::Device device;                 ///< logical device providing access to a physical one
-	vk::ShaderModule shader;           ///< compute shader
-//	vk::Queue queue;                   ///< command queue supporting compute operations
-	vk::DescriptorSetLayout dscLayout; ///< c++ definition of the shader binding interface
+	vk::PhysicalDevice physDevice;      ///< physical device
+	vk::Device device;                  ///< logical device providing access to a physical one
+	vk::ShaderModule shader;            ///< compute shader
+	vk::DescriptorSetLayout dscLayout;  ///< c++ definition of the shader binding interface
 	mutable vk::DescriptorPool dscPool; ///< descriptors pool
-	vk::CommandPool cmdPool;           ///< used to allocate command buffers
-	vk::PipelineCache pipeCache;       ///< pipeline cache
-	vk::PipelineLayout pipeLayout;     ///< defines shader interface as a set of layout bindings and push constants
-	
-	// buffers. do not really belong to filter. move out.
-	vk::Buffer status;
-	vk::DeviceMemory statusMem;
-	vk::Buffer range;
-	vk::DeviceMemory rangeMem;
-	vk::Buffer variance;
-	vk::DeviceMemory varianceMem;
-	vk::Buffer normals;
-	vk::DeviceMemory normalsMem;
+	vk::CommandPool cmdPool;            ///< used to allocate command buffers
+	vk::PipelineCache pipeCache;        ///< pipeline cache
+	vk::PipelineLayout pipeLayout;      ///< defines shader interface as a set of layout bindings and push constants
 	
 	vk::Pipeline pipe;                   ///< pipeline to submit compute commands
 	mutable vk::CommandBuffer cmdBuffer; ///< used to record commands to be queued
 	
-	uint32_t compute_queue_familly_id;
+	uint32_t compute_queue_familly_id;   ///< index of the queue family supporting compute loads
 public:
 	explicit ExampleFilter(const std::string& shaderPath);
 	~ExampleFilter() noexcept;
