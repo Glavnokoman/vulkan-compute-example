@@ -55,7 +55,7 @@ ExampleFilter::~ExampleFilter() noexcept {
 	device.destroyShaderModule(shader);
 	device.destroy();
 
-	if(enableValidation){
+	if(debugReportCallback){
 		// unregister callback.
 		auto destroyFn = PFN_vkDestroyDebugReportCallbackEXT(
 					vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT"));
@@ -199,7 +199,7 @@ auto ExampleFilter::createDescriptorSet(const vk::Device& device, const vk::Desc
 }
 
 /// Create command buffer, push the push constants, bind descriptors and define the work batch size.
-/// All command buffers allocated from given command pool must be submitted to queues of corresponding 
+/// All command buffers allocated from given command pool must be submitted to queues of corresponding
 /// family ONLY.
 auto ExampleFilter::createCommandBuffer(const vk::Device& device, const vk::CommandPool& cmdPool
                                        , const vk::Pipeline& pipeline
