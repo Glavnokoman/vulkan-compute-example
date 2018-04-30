@@ -10,7 +10,7 @@ using std::end;
 #define ARR_VIEW(x) uint32_t(x.size()), x.data()
 
 namespace vuh {
-	
+
 VKAPI_ATTR VkBool32 VKAPI_CALL debugReporter(
       VkDebugReportFlagsEXT , VkDebugReportObjectTypeEXT, uint64_t, size_t, int32_t
       , const char*                pLayerPrefix

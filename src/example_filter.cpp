@@ -114,7 +114,7 @@ auto ExampleFilter::createInstance(const std::vector<const char*> layers
                                   , const std::vector<const char*> extensions
                                   )-> vk::Instance
 {
-	auto appInfo = vk::ApplicationInfo("Mixed Pixel Filter", 0, "mixpix_engine"
+	auto appInfo = vk::ApplicationInfo("Example Filter", 0, "no_engine"
 	                                   , 0, VK_API_VERSION_1_0); // The only important field here is apiVersion
 	auto createInfo = vk::InstanceCreateInfo(vk::InstanceCreateFlags(), &appInfo
 	                                         , ARR_VIEW(layers), ARR_VIEW(extensions));
