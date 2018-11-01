@@ -12,6 +12,9 @@ Features covered:
 - very simple glsl shader (saxpy)
 - glsl to spir-v compilation (build time)
 
+This was an attempt to structure the Vulkan compute code in a way that would be easy to modify for each particular use case.
+I think I failed here so this example still sucks. But I learned while doing this and as a result there is a [vuh](https://github.com/Glavnokoman/vuh) Vulkan compute library which enables you to do the same but in (literally) 10 lines of code. You're cordially invited to use that instead.
+
 ## Dependencies
 - c++14 compatible compiler
 - cmake
